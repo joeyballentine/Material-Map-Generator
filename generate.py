@@ -101,7 +101,7 @@ for idx, path in enumerate(images, 1):
     model = load_model(NORMAL_MAP_MODEL)
 
     if do_split:
-        rlt = ops.esrgan_launcher_split_merge(img, process, 1, args.tile_size, model)
+        rlt = ops.esrgan_launcher_split_merge(img, process,model, scale_factor=1, tile_size=args.tile_size)
     else:
         rlt = process(img, model)
 
@@ -116,7 +116,7 @@ for idx, path in enumerate(images, 1):
     model = load_model(OTHER_MAP_MODEL)
 
     if do_split:
-        rlt = ops.esrgan_launcher_split_merge(img, process, 1, args.tile_size, model)
+        rlt = ops.esrgan_launcher_split_merge(img, process, model, scale_factor=1, tile_size=args.tile_size)
     else:
         rlt = process(img, model)
 
