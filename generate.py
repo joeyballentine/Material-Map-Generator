@@ -23,6 +23,8 @@ parser.add_argument('--replicate', action='store_true',
                     help='Replicate edge pixels for padding')
 parser.add_argument('--cpu', action='store_true',
                     help='Use CPU instead of CUDA')
+parser.add_argument('--ishiiruka', action='store_true',
+                    help='Save textures in the format used in Ishiiruka Dolphin material map texture packs')
 args = parser.parse_args()
 
 if not os.path.exists(args.input):
@@ -110,7 +112,8 @@ for idx, path in enumerate(images, 1):
 
     rlt = rlt.astype('uint8')
 
-    cv2.imwrite(os.path.join(output_folder, '{:s}_Normal.png'.format(base)), rlt)
+    texture_name = '{:s}.nrm.png'.format(base) if args.ishiiruka else '{:s}_Normal.png'.format(base)
+    cv2.imwrite(os.path.join(output_folder, texture_name), rlt)
 
     # ROUGHNESS/DISPLACEMENT MAPS
     model = load_model(OTHER_MAP_MODEL)
@@ -127,5 +130,9 @@ for idx, path in enumerate(images, 1):
     roughness = rlt[:, :, 1]
     displacement = rlt[:, :, 0]
 
-    cv2.imwrite(os.path.join(output_folder, '{:s}_Roughness.png'.format(base)), roughness)
-    cv2.imwrite(os.path.join(output_folder, '{:s}_Displacement.png'.format(base)), displacement)
+    rough_name = '{:s}.spec.png'.format(base) if args.ishiiruka else '{:s}_Roughness.png'.format(base)
+    rough_img = 255 - roughness if args.ishiiruka else roughness
+    cv2.imwrite(os.path.join(output_folder, rough_name), rough_img)
+
+    displ_name = '{:s}.bump.png'.format(base) if args.ishiiruka else '{:s}_Displacement.png'.format(base)
+    cv2.imwrite(os.path.join(output_folder, displ_name), displacement)
