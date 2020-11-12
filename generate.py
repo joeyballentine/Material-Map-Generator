@@ -99,36 +99,28 @@ for idx, path in enumerate(images, 1):
     # Whether or not to perform the split/merge action
     do_split = img_height > args.tile_size or img_width > args.tile_size
 
-    # NORMAL MAP
-    model = load_model(NORMAL_MAP_MODEL)
+    models = [
+        # NORMAL MAP
+        load_model(NORMAL_MAP_MODEL), 
+        # ROUGHNESS/DISPLACEMENT MAPS
+        load_model(OTHER_MAP_MODEL)
+        ]
 
     if do_split:
-        rlt = ops.esrgan_launcher_split_merge(img, process,model, scale_factor=1, tile_size=args.tile_size)
+        rlts = ops.esrgan_launcher_split_merge(img, process, models, scale_factor=1, tile_size=args.tile_size)
     else:
-        rlt = process(img, model)
+        rlts = [process(img, model) for model in models]
 
     if args.seamless or args.mirror or args.replicate:
-        rlt = ops.crop_seamless(rlt)
+        rlts = [ops.crop_seamless(rlt) for rlt in rlts]
 
-    rlt = rlt.astype('uint8')
+    normal_map = rlts[0]
 
-    texture_name = '{:s}.nrm.png'.format(base) if args.ishiiruka else '{:s}_Normal.png'.format(base)
-    cv2.imwrite(os.path.join(output_folder, texture_name), rlt)
+    normal_name = '{:s}.nrm.png'.format(base) if args.ishiiruka else '{:s}_Normal.png'.format(base)
+    cv2.imwrite(os.path.join(output_folder, normal_name), normal_map)
 
-    # ROUGHNESS/DISPLACEMENT MAPS
-    model = load_model(OTHER_MAP_MODEL)
-
-    if do_split:
-        rlt = ops.esrgan_launcher_split_merge(img, process, model, scale_factor=1, tile_size=args.tile_size)
-    else:
-        rlt = process(img, model)
-
-    if args.seamless or args.mirror or args.replicate:
-        rlt = ops.crop_seamless(rlt)
-
-    rlt = rlt.astype('uint8')
-    roughness = rlt[:, :, 1]
-    displacement = rlt[:, :, 0]
+    roughness = rlts[1][:, :, 1]
+    displacement = rlts[1][:, :, 0]
 
     rough_name = '{:s}.spec.png'.format(base) if args.ishiiruka else '{:s}_Roughness.png'.format(base)
     rough_img = 255 - roughness if args.ishiiruka else roughness
