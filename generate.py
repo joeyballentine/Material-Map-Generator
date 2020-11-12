@@ -25,6 +25,8 @@ parser.add_argument('--cpu', action='store_true',
                     help='Use CPU instead of CUDA')
 parser.add_argument('--ishiiruka', action='store_true',
                     help='Save textures in the format used in Ishiiruka Dolphin material map texture packs')
+parser.add_argument('--ishiiruka_texture_encoder', action='store_true',
+                    help='Save textures in the format used by Ishiiruka Dolphin\'s Texture Encoder tool')
 args = parser.parse_args()
 
 if not os.path.exists(args.input):
@@ -115,16 +117,23 @@ for idx, path in enumerate(images, 1):
         rlts = [ops.crop_seamless(rlt) for rlt in rlts]
 
     normal_map = rlts[0]
-
-    normal_name = '{:s}.nrm.png'.format(base) if args.ishiiruka else '{:s}_Normal.png'.format(base)
-    cv2.imwrite(os.path.join(output_folder, normal_name), normal_map)
-
     roughness = rlts[1][:, :, 1]
     displacement = rlts[1][:, :, 0]
 
-    rough_name = '{:s}.spec.png'.format(base) if args.ishiiruka else '{:s}_Roughness.png'.format(base)
-    rough_img = 255 - roughness if args.ishiiruka else roughness
-    cv2.imwrite(os.path.join(output_folder, rough_name), rough_img)
+    if args.ishiiruka_texture_encoder:
+        r = 255 - roughness
+        g = normal_map[:, :, 1]
+        b = displacement
+        a = normal_map[:, :, 2]
+        output = cv2.merge((b, g, r, a))
+        cv2.imwrite(os.path.join(output_folder, '{:s}.mat.png'.format(base)), output)
+    else:
+        normal_name = '{:s}.nrm.png'.format(base) if args.ishiiruka else '{:s}_Normal.png'.format(base)
+        cv2.imwrite(os.path.join(output_folder, normal_name), normal_map)
 
-    displ_name = '{:s}.bump.png'.format(base) if args.ishiiruka else '{:s}_Displacement.png'.format(base)
-    cv2.imwrite(os.path.join(output_folder, displ_name), displacement)
+        rough_name = '{:s}.spec.png'.format(base) if args.ishiiruka else '{:s}_Roughness.png'.format(base)
+        rough_img = 255 - roughness if args.ishiiruka else roughness
+        cv2.imwrite(os.path.join(output_folder, rough_name), rough_img)
+
+        displ_name = '{:s}.bump.png'.format(base) if args.ishiiruka else '{:s}_Displacement.png'.format(base)
+        cv2.imwrite(os.path.join(output_folder, displ_name), displacement)
