@@ -80,6 +80,12 @@ for root, _, files in os.walk(input_folder):
     for file in sorted(files, reverse=args.reverse):
         if file.split('.')[-1].lower() in ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'tga']:
             images.append(os.path.join(root, file))
+models = [
+    # NORMAL MAP
+    load_model(NORMAL_MAP_MODEL), 
+    # ROUGHNESS/DISPLACEMENT MAPS
+    load_model(OTHER_MAP_MODEL)
+    ]
 for idx, path in enumerate(images, 1):
     base = os.path.splitext(os.path.relpath(path, input_folder))[0]
     output_dir = os.path.dirname(os.path.join(output_folder, base))
@@ -100,13 +106,6 @@ for idx, path in enumerate(images, 1):
 
     # Whether or not to perform the split/merge action
     do_split = img_height > args.tile_size or img_width > args.tile_size
-
-    models = [
-        # NORMAL MAP
-        load_model(NORMAL_MAP_MODEL), 
-        # ROUGHNESS/DISPLACEMENT MAPS
-        load_model(OTHER_MAP_MODEL)
-        ]
 
     if do_split:
         rlts = ops.esrgan_launcher_split_merge(img, process, models, scale_factor=1, tile_size=args.tile_size)
