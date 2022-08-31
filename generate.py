@@ -92,8 +92,11 @@ for idx, path in enumerate(images, 1):
     os.makedirs(output_dir, exist_ok=True)
     print(idx, base)
     # read image
-    img = cv2.imread(path, cv2.cv2.IMREAD_COLOR)
-
+    try: 
+        img = cv2.imread(path, cv2.cv2.IMREAD_COLOR)
+    except:
+        img = cv2.imread(path, cv2.IMREAD_COLOR)
+        
     # Seamless modes
     if args.seamless:
         img = cv2.copyMakeBorder(img, 16, 16, 16, 16, cv2.BORDER_WRAP)
