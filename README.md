@@ -7,7 +7,7 @@ Easily create AI generated Normal maps, Displacement maps, and Roughness maps.
 |Diffuse Texture|Normal Map|Displacement Map|Roughness Map|
 |<img src="./input/example.png" width="128" height="128">|<img src="./output/example_Normal.png" width="128" height="128">|<img src="./output/example_Displacement.png" width="128" height="128">|<img src="./output/example_Roughness.png" width="128" height="128">|
 
-Before you begin, make sure you have numpy, opencv-python, and pytorch installed.
+Before you begin, make sure you have numpy, opencv-python, and pytorch installed (`pip install torch -f https://download.pytorch.org/whl/torch_stable.html`).
 
 To run, put images in the `input` folder, and type `python generate.py`. Output images will then be placed in the `output` folder, with the type of map appended to the file name.
 
